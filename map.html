@@ -51,7 +51,10 @@
                 </select>
             </div>
 
-            
+            <div class="search-input-box">
+                <input type="text" id="keywordInput" placeholder="섬 이름 검색">
+                <button id="searchBtn">검색</button>
+            </div>
 
             <div class="island-list-wrapper">
                 <div class="island-list-header">
@@ -68,7 +71,10 @@
         <div id="territorialInfoPanel" class="floating-panel territorial-info-panel hidden">
             <div class="panel-header">
                 <h3>영해기점</h3>
-                <button id="closeTerritorialInfo" class="close-btn">×</button>
+                <div class="header-controls">
+                    <button id="toggleTerritorialInfo" class="close-btn" style="font-size: 1.2em;">−</button>
+                    <button id="closeTerritorialInfo" class="close-btn">×</button>
+                </div>
             </div>
             <div class="info-content">
                 <p>국토 최외곽에 위치해, 유엔해양법협약에 따라 우리나라의 <span  style="font-weight: 500;">해양 관할권 외측 한계</span>를 결정하는 시작점</p>
@@ -78,7 +84,10 @@
         <div id="detailPanel" class="floating-panel detail-panel hidden">
             <div class="panel-header">
                 <h3>상세 정보</h3>
-                <button id="closeDetailPanel" class="close-btn">×</button>
+                <div class="header-controls">
+                    <button id="toggleDetailPanel" class="close-btn" style="font-size: 1.2em;">−</button>
+                    <button id="closeDetailPanel" class="close-btn">×</button>
+                </div>
             </div>
             <div id="detailContainer" class="detail-container"></div> 
             <div class="resize-handle bottom-handle"></div>
@@ -88,10 +97,13 @@
         
         <button id="openSearchPanelBtn" class="sidebar-toggle-btn hidden" title="검색창 열기">▶</button>
 
-        <div id="portListBox" class="port-list-box hidden">             
+        <div id="portListBox" class="port-list-box hidden"> 
             <div class="t-list-header" style="background-color: #d47070;">
                 <h4>🚢 항구 목록</h4>
-                <button id="closePortList" class="close-btn-white">×</button>
+                <div class="header-controls">
+                    <button id="togglePortList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closePortList" class="close-btn-white">×</button>
+                </div>
             </div>
             <div id="portListContent" class="t-list-content"></div>
             <div class="resize-handle bottom-handle"></div>
@@ -100,7 +112,10 @@
         <div id="territorialListBox" class="territorial-list-box hidden"> 
             <div class="t-list-header">
                 <h4>⚓ 영해기점 목록</h4>
-                <button id="closeTerritorialList" class="close-btn-white">×</button>
+                <div class="header-controls">
+                    <button id="toggleTerritorialList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closeTerritorialList" class="close-btn-white">×</button>
+                </div>
             </div>
             <div id="territorialListContent" class="t-list-content"></div>
             <div id="territorialPagination" class="pagination-container"></div>
@@ -108,9 +123,12 @@
         </div>
 
         <div id="viewportListBox" class="viewport-list-box hidden">
-            <div class="t-list-header" style="background-color: rgb(143, 194, 244, 0.7);">
+            <div class="t-list-header" style="background-color: #8fc2f4;">
                 <h4 id="viewportCount">현재 화면의 섬 (0)</h4>
-                <button id="closeViewportList" class="close-btn-white">×</button>
+                <div class="header-controls">
+                    <button id="toggleViewportList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closeViewportList" class="close-btn-white">×</button>
+                </div>
             </div>
             <div id="viewportListContent" class="t-list-content viewport-content">
                 <p style="padding:10px; color:#999; font-size:0.8em;">지도를 확대하면 목록이 보입니다.</p>
