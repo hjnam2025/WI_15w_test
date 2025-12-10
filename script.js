@@ -183,7 +183,7 @@ function createDetailContent(island) {
         <div class="sticky-info-header">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                 <h3>${name}</h3>
-                <button class="route-search-btn" onclick="window.open('${searchUrl}', '_blank')" style="font-family:GMarketSans; font-weight: 500; font-size: 1em; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 15px;">
+                <button class="route-search-btn" onclick="window.open('${searchUrl}', '_blank')" style="font-family:GMarketSans; font-weight: 500; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 15px;">
                     경로찾기 <img src="img/search.svg" alt="검색" style="width: 18px; height: 18px;">
                 </button>
             </div>
@@ -644,20 +644,19 @@ function updateIslandList(regionName, sigungu = '') {
     const usableBtn = document.getElementById('usableToggleBtn'); 
     const isUsableActive = usableBtn && usableBtn.classList.contains('active');
     
-    // [자동 펼치기]
+    // [자동 펼치기] - 검색이나 지역 선택 시 패널 열기
     const list = document.getElementById('islandList');
     const toggleBtn = document.getElementById('toggleIslandList');
-    const handle = document.querySelector('#searchPanel .resize-handle');
-    const searchPanel = document.getElementById('searchPanel'); // 패널 높이 조절 위해 추가
-
+    const searchPanel = document.getElementById('searchPanel');
+    const resizeHandle = searchPanel ? searchPanel.querySelector('.resize-handle') : null;
+    
     if (regionName || sigungu) {
-        if(list && list.style.display === 'none') {
-            list.style.display = 'block';
-            if(handle) handle.style.display = 'flex';
+        if (searchPanel.classList.contains('collapsed')) {
+            searchPanel.classList.remove('collapsed');
             if(toggleBtn) toggleBtn.textContent = '접기 ▲';
-            // 리스트 펼칠 때 패널 높이 원래대로 복구 (CSS 60vh 또는 사용자가 조절한 높이)
-            // 여기선 CSS 기본값 60vh로 리셋하거나, 그냥 auto 해제하면 됨.
-            searchPanel.style.height = '60vh'; 
+            if(resizeHandle) resizeHandle.style.display = 'flex';
+            // 리스트도 보이게 (CSS에서 collapsed로 제어하지만 JS display도 체크)
+            if(list) list.style.display = 'block';
         }
     }
 
@@ -751,6 +750,49 @@ function toggleSearchPanel() {
     if (searchPanel.classList.contains('hidden')) { searchPanel.classList.remove('hidden'); openBtn.classList.add('hidden'); } else { searchPanel.classList.add('hidden'); openBtn.classList.remove('hidden'); }
 }
 
+// [추가] 패널 접기/펼치기 제어 함수 (중복 제거)
+function setupCollapseButtons() {
+    const panels = [
+        { btnId: 'toggleIslandList', panelId: 'searchPanel' }, // 검색패널(섬목록)
+        { btnId: 'toggleTerritorialInfo', panelId: 'territorialInfoPanel' },
+        { btnId: 'toggleDetailPanel', panelId: 'detailPanel' },
+        { btnId: 'togglePortList', panelId: 'portListBox' },
+        { btnId: 'toggleTerritorialList', panelId: 'territorialListBox' },
+        { btnId: 'toggleViewportList', panelId: 'viewportListBox' }
+    ];
+
+    panels.forEach(p => {
+        const btn = document.getElementById(p.btnId);
+        const panel = document.getElementById(p.panelId);
+        
+        if (btn && panel) {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 이벤트 전파 방지
+                panel.classList.toggle('collapsed');
+                
+                // 검색 패널 버튼 텍스트 변경
+                if(p.panelId === 'searchPanel') {
+                    const list = document.getElementById('islandList');
+                    if (panel.classList.contains('collapsed')) {
+                        btn.textContent = '펼치기 ▼';
+                        if(list) list.style.display = 'none'; // 목록도 숨김
+                    } else {
+                        btn.textContent = '접기 ▲';
+                        if(list) list.style.display = 'block'; // 목록 보임
+                    }
+                } else {
+                    // 나머지 패널은 + / - 아이콘 변경
+                    if (panel.classList.contains('collapsed')) {
+                        btn.textContent = '+';
+                    } else {
+                        btn.textContent = '−';
+                    }
+                }
+            });
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const territorialBtn = document.getElementById('territorialToggleBtn');
     const usableBtn = document.getElementById('usableToggleBtn');
@@ -763,6 +805,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadIslands();
     loadPorts();
+    
+    // 버튼 초기화 호출
+    setupCollapseButtons();
 
     const territorialInfoPanel = document.getElementById('territorialInfoPanel');
     const closeTerritorialInfo = document.getElementById('closeTerritorialInfo');
@@ -805,30 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('toggleSearchPanelBtn').onclick = toggleSearchPanel;
     document.getElementById('openSearchPanelBtn').onclick = toggleSearchPanel;
     
-    // [수정] 접기/펼치기 버튼 로직: 내용물에 맞춰 패널 높이 자동 조절
-    document.getElementById('toggleIslandList').onclick = function() {
-        const list = document.getElementById('islandList');
-        const handle = document.querySelector('#searchPanel .resize-handle'); 
-        const searchPanel = document.getElementById('searchPanel');
-
-        if (list.style.display === 'none') { 
-            // 펼칠 때
-            list.style.display = 'block'; 
-            if(handle) handle.style.display = 'flex';
-            this.textContent = '접기 ▲'; 
-            searchPanel.style.height = '60vh'; // 원래 크기로 복구
-        } else { 
-            // 접을 때
-            list.style.display = 'none'; 
-            if(handle) handle.style.display = 'none'; 
-            this.textContent = '펼치기 ▼'; 
-            // 높이를 auto로 바꿔서 딱 내용물만큼만 차지하게 함
-            searchPanel.style.height = 'auto';
-            // min-height 때문에 안 줄어들 수 있으니 min-height도 잠시 해제 (필요시)
-            // searchPanel.style.minHeight = '0'; 
-        }
-    };
-
     const rSel = document.getElementById('regionSelect');
     const sSel = document.getElementById('sigunguSelect');
 
@@ -1029,14 +1050,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 검색 결과 있으면 리스트 강제로 열기
         const list = document.getElementById('islandList');
         const toggleBtn = document.getElementById('toggleIslandList');
-        const handle = document.querySelector('#searchPanel .resize-handle');
         const searchPanel = document.getElementById('searchPanel');
         
-        if (list.style.display === 'none') {
-            list.style.display = 'block';
-            if(handle) handle.style.display = 'flex';
+        if (searchPanel.classList.contains('collapsed')) {
+            searchPanel.classList.remove('collapsed');
             if(toggleBtn) toggleBtn.textContent = '접기 ▲';
-            searchPanel.style.height = '60vh'; 
+            if(list) list.style.display = 'block';
         }
     }
 
@@ -1054,7 +1073,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const panel = document.getElementById(panelId);
         if (!panel) return;
         
-        // CSS에서 .resize-handle을 투명하고 top: 0 또는 bottom: 0으로 위치시킴
         const resizeHandle = panel.querySelector('.resize-handle');
         if (!resizeHandle) return;
 
@@ -1075,14 +1093,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const dy = e.clientY - startY;
             let newHeight;
             
-            // SearchPanel(상단)은 아래로 드래그하면 커져야 함 (dy 양수 -> 높이 증가)
-            if (panelId === 'searchPanel') {
-                newHeight = startHeight + dy;
-            } 
-            // 나머지 하단 패널들은 위로 드래그하면 커져야 함 (dy 음수 -> 높이 증가)
-            else {
-                newHeight = startHeight - dy;
-            }
+            // 모든 패널: 아래로 드래그(+dy) 하면 높이 증가
+            newHeight = startHeight + dy;
             
             const minH = panelId === 'searchPanel' ? 250 : 100;
 
